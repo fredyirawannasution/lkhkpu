@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Aplikasi LKH</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon-192.png">
+  <meta name="theme-color" content="#d71920">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="LKH">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <style>
+    :root {
+      --bg: #0b1220;
+      --brand: #d71920;
+      --text: #ffffff;
+      --muted: rgba(255,255,255,.75);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: Arial, sans-serif;
+    }
+
+    .shell {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      grid-template-rows: 1fr;
+      background: var(--bg);
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+      background: #fff;
+    }
+
+    .loading,
+    .errorBox {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 20% 0%, rgba(215,25,32,.28), transparent 60%),
+        linear-gradient(180deg, #0b1220, #111827);
+      text-align: center;
+      z-index: 2;
+    }
+
+    .loadingCard,
+    .errorCard {
+      width: min(460px, 100%);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 22px;
+      padding: 22px;
+      background: rgba(15,23,42,.86);
+      box-shadow: 0 18px 45px rgba(0,0,0,.35);
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .openBtn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 16px;
+      min-height: 42px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--brand);
+      color: #fff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <!--
+    GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT APPS SCRIPT /exec KAMU.
+    Contoh:
+    https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec
+  -->
+  <script>
+    window.APPS_SCRIPT_URL = 'https://script.google.com/macros/s/DEPLOYMENT_ID_KAMU/exec';
+  </script>
+
+  <div class="shell">
+    <iframe
+      id="appFrame"
+      title="Aplikasi LKH"
+      allow="clipboard-read; clipboard-write; fullscreen; downloads"
+      referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+  </div>
+
+  <div id="loading" class="loading">
+    <div class="loadingCard">
+      <div class="title">Membuka Aplikasi LKH...</div>
+      <div class="sub">Frontend PWA sedang memuat aplikasi utama dari Apps Script.</div>
+    </div>
+  </div>
+
+  <div id="errorBox" class="errorBox hidden">
+    <div class="errorCard">
+      <div class="title">Aplikasi belum bisa dimuat</div>
+      <div class="sub">
+        Pastikan URL Apps Script di <b>index.html</b> sudah diganti dan <b>Code.gs</b> sudah memakai ALLOWALL.
+      </div>
+      <a id="openDirect" class="openBtn" href="#" target="_blank" rel="noopener">Buka langsung Apps Script</a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const frame = document.getElementById('appFrame');
+      const loading = document.getElementById('loading');
+      const errorBox = document.getElementById('errorBox');
+      const openDirect = document.getElementById('openDirect');
+      const url = String(window.APPS_SCRIPT_URL || '').trim();
+
+      function showError() {
+        loading.classList.add('hidden');
+        errorBox.classList.remove('hidden');
+        openDirect.href = url || '#';
+      }
+
+      if (!url || url.includes('DEPLOYMENT_ID_KAMU')) {
+        showError();
+        return;
+      }
+
+      openDirect.href = url;
+      frame.src = url;
+
+      frame.addEventListener('load', function () {
+        loading.classList.add('hidden');
+      });
+
+      setTimeout(function () {
+        if (!loading.classList.contains('hidden')) {
+          loading.classList.add('hidden');
+        }
+      }, 7000);
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(function () {});
+      }
+    })();
+  </script>
+</body>
+</html>
